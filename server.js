@@ -58,8 +58,12 @@ async function readJsonResponse(response, serviceName) {
       data.error ||
       `HTTP ${response.status}`;
 
-    const issue = detailItem?.issue ? ` (${detailItem.issue})` : "";
-    throw new Error(`${serviceName} request failed${issue}: ${detail}`);
+    const issue = detailItem?.issue || "";
+    const error = new Error(
+      `${serviceName} request failed${issue ? ` (${issue})` : ""}: ${detail}`,
+    );
+    error.paypalIssue = issue;
+    throw error;
   }
 
   return data;
@@ -136,7 +140,19 @@ async function capturePayPalOrder(orderId) {
     },
   );
 
-  return readJsonResponse(response, "PayPal order capture");
+  try {
+    return await readJsonResponse(response, "PayPal order capture");
+  } catch (error) {
+    if (error.paypalIssue === "ORDER_ALREADY_CAPTURED") {
+      return {
+        id: orderId,
+        status: "COMPLETED",
+        alreadyCaptured: true,
+      };
+    }
+
+    throw error;
+  }
 }
 
 function parseEvaluation(content) {
