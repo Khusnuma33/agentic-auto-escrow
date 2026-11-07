@@ -53,7 +53,9 @@ export default function FreelancerPage() {
         );
       }
     } catch (requestError) {
-      setError(requestError.message);
+      setError(
+        "The AI auditor is busy or unreachable. Please try again in a minute.",
+      );
       setStatus("error");
     }
   }
@@ -97,10 +99,11 @@ export default function FreelancerPage() {
       </div>
 
       {result && (
-        <section className={`mt-6 rounded-3xl border p-7 ${status === "approved" ? "border-emerald-200 bg-emerald-50" : "border-amber-200 bg-amber-50"}`}>
-          <p className={`text-sm font-black uppercase tracking-[0.16em] ${status === "approved" ? "text-emerald-700" : "text-amber-700"}`}>{result.status}</p>
-          <h2 className={`mt-2 text-3xl font-black ${status === "approved" ? "text-emerald-900" : "text-amber-900"}`}>{status === "approved" ? "PayPal payment completed" : "Escrow remains held"}</h2>
+        <section className={`mt-6 rounded-3xl border p-7 ${status === "approved" ? "border-emerald-200 bg-emerald-50" : "border-rose-200 bg-rose-50"}`}>
+          <p className={`text-sm font-black uppercase tracking-[0.16em] ${status === "approved" ? "text-emerald-700" : "text-rose-700"}`}>{status === "approved" ? result.status : "REJECTED"}</p>
+          <h2 className={`mt-2 text-3xl font-black ${status === "approved" ? "text-emerald-900" : "text-rose-900"}`}>{status === "approved" ? "PayPal payment completed" : "Payment withheld"}</h2>
           <p className="mt-3 max-w-2xl leading-7 text-slate-700">{result.reason}</p>
+          {status === "rejected" && <p className="mt-4 text-sm font-semibold text-rose-800">Funds remain safely in escrow. Fix your code and resubmit.</p>}
           {status === "approved" && <p className="mt-5 inline-flex rounded-full bg-emerald-700 px-4 py-2 text-sm font-black text-white">● COMPLETED</p>}
         </section>
       )}
